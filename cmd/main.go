@@ -1,50 +1,65 @@
 package main
 
 import (
-	"UserPDFMaker/internal"
-	"bufio"
-	"fmt"
-	"os"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/widget"
 )
 
 func main() {
-	// db, err := initDB()
-	// if err != nil {
-	// 	fmt.Println("Ошибка подключения к базе данных:", err)
-	// 	return
-	// }
+	// Создаем приложение
+	myApp := app.New()
+	myWindow := myApp.NewWindow("Выбор файла и шаблона")
 
-	// Создание нового reader для чтения ввода с клавиатуры
-	reader := bufio.NewReader(os.Stdin)
+	// Переменные для хранения пути и ID
+	var filePath string
+	var selectedTemplate string
+	var ids []string
 
-	// Запрос ФИО
-	fmt.Print("Введите ФИО: ")
-	fullName, _ := reader.ReadString('\n')
-	fullName = fullName[:len(fullName)-1] // Удаление символа новой строки
+	// Создаем кнопку для открытия диалогового окна
+	openFileButton := widget.NewButton("Выбрать файл или директорию", func() {
+		dialog.ShowFileOpen(func(uc fyne.URIReadCloser, err error) {
+			if uc != nil {
+				filePath = uc.URI().Path()
+				uc.Close()
+			}
+		}, myWindow)
+	})
 
-	// Запрос Типа работы
-	fmt.Print("Введите тип работы: ")
-	workType, _ := reader.ReadString('\n')
-	workType = workType[:len(workType)-1] // Удаление символа новой строки
+	// Выпадающий список для выбора шаблона
+	templateOptions := []string{"Шаблон 1", "Шаблон 2"}
+	templateSelect := widget.NewSelect(templateOptions, func(value string) {
+		selectedTemplate = value
+	})
 
-	// Запрос пути к файлу подписи (необязательный)
-	/*fmt.Print("Введите путь к файлу подписи (или нажмите Enter, чтобы пропустить): ")
-	signature, _ := reader.ReadString('\n')
-	signature = signature[:len(signature)-1] // Удаление символа новой строки*/
-	var user = internal.User{
-		FullName:  fullName,
-		WorkType:  workType,
-		Signature: "C:\\Labis\\Projects\\UserPDFMaker\\images\\image.png",
+	_ = filePath
+	_ = selectedTemplate
+
+	// Текстовое поле для ввода IDшников
+	idEntry := widget.NewEntry()
+	idEntry.SetPlaceHolder("Введите ID (0 для завершения ввода)")
+	idEntry.OnSubmitted = func(value string) {
+		if value == "0" {
+			// Завершаем ввод ID
+			dialog.ShowInformation("Информация", "Ввод ID завершен", myWindow)
+		} else {
+			ids = append(ids, value)
+			idEntry.SetText("") // очищаем поле для следующего ввода
+		}
 	}
 
-	// db.First(&user, 1)
+	// Компонуем элементы на экране
+	content := container.NewVBox(
+		openFileButton,
+		widget.NewLabel("Выберите шаблон:"),
+		templateSelect,
+		widget.NewLabel("Введите IDшники:"),
+		idEntry,
+	)
 
-	// Генерация PDF
-	err := internal.GeneratePDF(user)
-	if err != nil {
-		fmt.Println("Ошибка генерации PDF:", err)
-		return
-	}
-
-	fmt.Println("PDF файл успешно создан!")
+	myWindow.SetContent(content)
+	myWindow.Resize(fyne.NewSize(400, 300))
+	myWindow.ShowAndRun()
 }
