@@ -1,62 +1,99 @@
 package main
 
 import (
+	"fmt"
+	// "os"
+	// "path/filepath"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
+
+	// d2 "fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"github.com/sqweek/dialog"
 )
 
 func main() {
-	// Создаем приложение
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Выбор файла и шаблона")
 
-	// Переменные для хранения пути и ID
-	var filePath string
+	var filePath []string
 	var selectedTemplate string
 	var ids []string
+	// widget.NewButton("custom button", func() {
+	// 	d2.NewFileOpen(func(r []fyne.URIReadCloser, err error) {
+	// 		if err != nil {
+	// 			d2.ShowError(err, myWindow)
+	// 			return
+	// 		}
+	// 		if r != nil {
+	// 			uri := r.URI()
+	// 			if fileInfo, err := os.Stat(uri.Path()); err == nil {
+	// 				if fileInfo.IsDir() {
+	// 					// Если это директория, получаем все файлы в ней
+	// 					files, err := os.ReadDir(uri.Path())
+	// 					if err != nil {
+	// 						d2.ShowError(err, myWindow)
+	// 						return
+	// 					}
+	// 					for _, file := range files {
+	// 						if !file.IsDir() {
+	// 							filePath = append(filePath, filepath.Join(uri.Path(), file.Name()))
+	// 						}
+	// 					}
+	// 				} else {
+	// 					// Если это файл, добавляем его путь в filePath
+	// 					filePath = append(filePath, uri.Path())
+	// 				}
+	// 				fmt.Println("Выбранные пути:", filePath)
+	// 			}
+	// 		}
+	// 	}, myWindow)
+	// })
 
-	// Создаем кнопку для открытия диалогового окна
-	openFileButton := widget.NewButton("Выбрать файл или директорию", func() {
-		dialog.ShowFileOpen(func(uc fyne.URIReadCloser, err error) {
-			if uc != nil {
-				filePath = uc.URI().Path()
-				uc.Close()
-			}
-		}, myWindow)
+	openFileButton := widget.NewButton("Выбрать файл", func() {
+		selectedPath, err := dialog.File().Filter("Все файлы", "*").Load()
+		if err != nil {
+			dialog.Message("%s", err.Error()).Title("Ошибка")
+			return
+		}
+		if selectedPath != "" {
+			// Добавляем путь в список
+			filePath = append(filePath, selectedPath)
+			fmt.Println("Выбранный путь:", filePath)
+		}
 	})
 
-	// Выпадающий список для выбора шаблона
 	templateOptions := []string{"Шаблон 1", "Шаблон 2"}
 	templateSelect := widget.NewSelect(templateOptions, func(value string) {
 		selectedTemplate = value
+		fmt.Println("Выбранный шаблон:", selectedTemplate)
 	})
 
-	_ = filePath
-	_ = selectedTemplate
-
-	// Текстовое поле для ввода IDшников
 	idEntry := widget.NewEntry()
 	idEntry.SetPlaceHolder("Введите ID (0 для завершения ввода)")
 	idEntry.OnSubmitted = func(value string) {
 		if value == "0" {
-			// Завершаем ввод ID
-			dialog.ShowInformation("Информация", "Ввод ID завершен", myWindow)
+			fmt.Println("Введенные ID:", ids)
 		} else {
 			ids = append(ids, value)
-			idEntry.SetText("") // очищаем поле для следующего ввода
+			idEntry.SetText("")
 		}
 	}
 
-	// Компонуем элементы на экране
+	stopButton := widget.NewButton("Завершить ввод ID", func() {
+		fmt.Println("Введенные ID:", ids)
+	})
+
 	content := container.NewVBox(
 		openFileButton,
+		// openfolderbtton,
 		widget.NewLabel("Выберите шаблон:"),
 		templateSelect,
 		widget.NewLabel("Введите IDшники:"),
 		idEntry,
+		stopButton,
 	)
 
 	myWindow.SetContent(content)
