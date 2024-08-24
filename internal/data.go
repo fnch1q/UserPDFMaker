@@ -1,8 +1,8 @@
 package internal
 
 type User struct {
-	ID        uint `gorm:"primaryKey"`
-	FullName  string
+	ID        string
 	WorkType  string
+	FullName  string
 	Signature string // путь к файлу с изображением подписи
 }
