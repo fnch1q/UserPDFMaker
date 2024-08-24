@@ -1,17 +1,17 @@
 package main
 
 import (
+	"UserPDFMaker/internal"
 	"fmt"
-	// "os"
-	// "path/filepath"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-
-	// d2 "fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/sqweek/dialog"
+	// "os"
+	// "path/filepath"
+	// d2 "fyne.io/fyne/v2/dialog"
 )
 
 func main() {
@@ -21,6 +21,7 @@ func main() {
 	var filePath []string
 	var selectedTemplate string
 	var ids []string
+
 	// widget.NewButton("custom button", func() {
 	// 	d2.NewFileOpen(func(r []fyne.URIReadCloser, err error) {
 	// 		if err != nil {
@@ -99,4 +100,11 @@ func main() {
 	myWindow.SetContent(content)
 	myWindow.Resize(fyne.NewSize(400, 300))
 	myWindow.ShowAndRun()
+
+	//для теста экселя
+	idsForCheck := make([]string, 0)
+	idsForCheck = append(idsForCheck, "1")
+	idsForCheck = append(idsForCheck, "2")
+	idsForCheck = append(idsForCheck, "6")
+	internal.ReadDataFromExcel(idsForCheck)
 }
