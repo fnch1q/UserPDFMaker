@@ -1,26 +1,36 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
-	"log"
 
 	"github.com/xuri/excelize/v2"
 )
 
-func ReadDataFromExcel(ids []string) []User {
+var (
+	ErrExcelFileNotExists = errors.New("err_when_open_file")
+	ErrWhenReadingRows    = errors.New("err_when_reading_rows")
+)
+
+func ReadDataFromExcel(ids []string) ([]User, error) {
 	var users []User
 	file, err := excelize.OpenFile("workers.xlsx")
 	if err != nil {
-		log.Fatal(err)
+		return users, ErrExcelFileNotExists
 	}
 
 	rows, err := file.GetRows("Sheet1")
 	if err != nil {
-		log.Fatal(err)
+		return users, ErrWhenReadingRows
+	}
+
+	idMap := make(map[string]bool)
+	for _, id := range ids {
+		idMap[id] = true
 	}
 
 	for _, row := range rows {
-		if !compareID(row[0], ids) {
+		if !compareID(row[0], idMap) {
 			continue
 		}
 		var user User
@@ -39,14 +49,9 @@ func ReadDataFromExcel(ids []string) []User {
 		fmt.Println(user)
 		users = append(users, user)
 	}
-	return users
+	return users, nil
 }
 
-func compareID(id string, ids []string) bool {
-	for _, val := range ids {
-		if id == val {
-			return true
-		}
-	}
-	return false
+func compareID(id string, ids map[string]bool) bool {
+	return ids[id]
 }
