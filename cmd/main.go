@@ -3,6 +3,7 @@ package main
 import (
 	"UserPDFMaker/internal"
 	"fmt"
+	"log"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -12,26 +13,37 @@ import (
 	"github.com/sqweek/dialog"
 )
 
-var filePathes []string
-var filePathesString string = "Выбранные файлы:"
+var fileNames strings.Builder
 var selectedTemplate string
+var files []internal.File // Массив структур File
 
 func main() {
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Тут будет тайтл аля название приложение")
+	myWindow.Resize(fyne.NewSize(750, 450))
 
-	pathes := widget.NewLabel(filePathesString)
+	// Инициализация строки с выбранными файлами
+	fileNames.WriteString("Выбранные файлы:")
+	pathes := widget.NewLabel(fileNames.String())
+
 	openFileButton := widget.NewButton("Выберите файл", func() {
 		selectedPath, err := dialog.File().Filter("Все файлы", "*").Load()
 		if err != nil {
-			dialog.Message("%s", err.Error()).Title("Ошибка")
+			dialog.Message("%s", err.Error()).Title("Ошибка").Error()
 			return
 		}
 		if selectedPath != "" {
-			filePathes = append(filePathes, selectedPath)
-			filePathesString += "\n" + selectedPath
-			pathes.SetText(filePathesString)
-			fmt.Println("Выбранный путь:", filePathes)
+			// Создаем новый объект File и добавляем его в массив
+			newFile, err := internal.NewFile(selectedPath)
+			if err != nil {
+				dialog.Message("%s", err.Error()).Title("Ошибка").Error()
+				return
+			}
+
+			files = append(files, *newFile) // Добавляем в массив файлов
+			fileNames.WriteString("\n" + newFile.Name)
+			pathes.SetText(fileNames.String())
+			fmt.Println("Выбранные файлы:", files)
 		}
 	})
 
@@ -46,14 +58,20 @@ func main() {
 	idEntry.SetPlaceHolder("Введите ID сотрудников через пробел")
 
 	confirmWorkersButton := widget.NewButton("Подтвердить подписантов", func() {
-		var usersName string = "Выбранные подписанты:"
+		var usersName strings.Builder
+		usersName.WriteString("Выбранные подписанты:")
 		ids := strings.Split(idEntry.Text, " ")
 		fmt.Println("IDS", ids)
-		users := internal.ReadDataFromExcel(ids)
-		for _, user := range users {
-			usersName += "\n" + user.WorkType + " " + user.FullName
+		users, err := internal.ReadDataFromExcel(ids)
+		if err != nil {
+			dialog.Message("%s", err.Error()).Title("Ошибка").Error()
+			log.Println("Ошибка при чтении данных из Excel:", err)
+		} else {
+			for _, user := range users {
+				usersName.WriteString("\n" + user.WorkType + " " + user.FullName)
+			}
 		}
-		names.SetText(usersName)
+		names.SetText(usersName.String())
 	})
 
 	content := container.NewVBox(
@@ -68,6 +86,5 @@ func main() {
 	)
 
 	myWindow.SetContent(content)
-	myWindow.Resize(fyne.NewSize(750, 450))
 	myWindow.ShowAndRun()
 }
