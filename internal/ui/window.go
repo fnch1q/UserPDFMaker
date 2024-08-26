@@ -15,6 +15,9 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 	window := app.NewWindow("PDF Maker")
 	window.Resize(fyne.NewSize(800, 500))
 
+	icon, _ := fyne.LoadResourceFromPath("../images/app_icon.png")
+	window.SetIcon(icon)
+
 	// Создание и добавление элементов интерфейса
 	fileGroup := CreateFileGroup()
 	templateGroup := CreateTemplateGroup()
