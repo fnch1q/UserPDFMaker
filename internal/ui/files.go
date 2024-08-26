@@ -12,7 +12,7 @@ import (
 
 func CreateFileGroup() *fyne.Container {
 	fileList := container.NewVBox()
-	openFileButton := widget.NewButtonWithIcon("Выберите файл", theme.FolderIcon(), func() {
+	openFileButton := widget.NewButtonWithIcon("Добавить файл", theme.FolderIcon(), func() {
 		selectedPath, err := dialog.File().Filter("Все файлы", "*").Load()
 		if err != nil {
 			dialog.Message("%s", err.Error()).Title("Ошибка").Error()
@@ -30,8 +30,11 @@ func CreateFileGroup() *fyne.Container {
 		}
 	})
 
+	label := widget.NewLabel("Файлы:")
+	label.TextStyle = fyne.TextStyle{Bold: true}
+
 	return container.NewVBox(
-		widget.NewLabel("Файлы:"),
+		label,
 		fileList,
 		openFileButton,
 	)

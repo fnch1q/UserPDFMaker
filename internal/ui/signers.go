@@ -29,8 +29,11 @@ func CreateSignerGroup() *fyne.Container {
 		}
 	})
 
+	label := widget.NewLabel("Подписанты:")
+	label.TextStyle = fyne.TextStyle{Bold: true}
+
 	return container.NewVBox(
-		widget.NewLabel("Подписанты:"),
+		label,
 		signerList, // Включаем контейнер для списка подписантов
 		idEntry,
 		confirmWorkersButton,

@@ -12,8 +12,11 @@ func CreateTemplateGroup() *fyne.Container {
 		selectedTemplate = value
 	})
 
+	label := widget.NewLabel("Выберите шаблон:")
+	label.TextStyle = fyne.TextStyle{Bold: true}
+
 	return container.NewVBox(
-		widget.NewLabel("Выберите шаблон:"),
+		label,
 		templateSelect,
 	)
 }
