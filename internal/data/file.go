@@ -1,28 +1,11 @@
-package internal
+package data
 
 import (
 	"fmt"
 	"hash/crc32"
 	"io"
 	"os"
-	"time"
 )
-
-type User struct {
-	ID        string
-	WorkType  string
-	FullName  string
-	Signature string // путь к файлу с изображением подписи
-}
-
-type File struct {
-	ID         string
-	Path       string
-	Name       string
-	Hash       string
-	UpdateTime time.Time
-	Size       int64
-}
 
 func NewFile(path string) (*File, error) {
 	fileInfo, err := os.Stat(path)

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"UserPDFMaker/internal/data"
 	_ "image/jpeg"
 
 	"github.com/jung-kurt/gofpdf"
@@ -13,7 +14,7 @@ func encodeToWindows1251(input string) string {
 	return output
 }
 
-func GeneratePDF(user User) error {
+func GeneratePDF(user data.User) error {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 
