@@ -16,16 +16,19 @@ import (
 
 var selectedTemplate string
 var files []internal.File
+var users []internal.User // Массив подписантов
 
 func main() {
 	myApp := app.New()
-	myWindow := myApp.NewWindow("Тут будет тайтл аля название приложение")
-	myWindow.Resize(fyne.NewSize(750, 450))
+	myWindow := myApp.NewWindow("PDF Maker")
+	myWindow.Resize(fyne.NewSize(800, 500))
 
-	fileList := container.NewVBox()   // Контейнер для списка файлов
-	signerList := container.NewVBox() // Контейнер для списка подписантов
+	// Контейнеры для файлов и подписантов
+	fileList := container.NewVBox()
+	signerList := container.NewVBox()
 
-	openFileButton := widget.NewButton("Выберите файл", func() {
+	// Кнопка для выбора файлов
+	openFileButton := widget.NewButtonWithIcon("Выберите файл", theme.FolderIcon(), func() {
 		selectedPath, err := dialog.File().Filter("Все файлы", "*").Load()
 		if err != nil {
 			dialog.Message("%s", err.Error()).Title("Ошибка").Error()
@@ -40,94 +43,112 @@ func main() {
 
 			files = append(files, *newFile)
 
-			// Создаем новый элемент для списка файлов
+			// Добавляем файл в интерфейс
 			fileLabel := widget.NewLabel(newFile.Name)
-
-			// Переменная для хранения горизонтального контейнера с меткой и кнопкой
 			fileContainer := container.NewHBox()
-
-			// Используем NewButtonWithIcon для создания кнопки с иконкой
 			removeButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-				// Удаляем файл из списка
+				// Удаление файла из списка
 				for i, f := range files {
 					if f.Path == newFile.Path {
 						files = append(files[:i], files[i+1:]...)
 						break
 					}
 				}
-				// Удаляем элемент из контейнера
 				fileList.Remove(fileContainer)
 				fmt.Println("Текущие файлы:", files)
 			})
 
-			// Добавляем метку и кнопку в контейнер
 			fileContainer.Add(fileLabel)
 			fileContainer.Add(removeButton)
-
-			// Добавляем контейнер с файлом в список
 			fileList.Add(fileContainer)
 
 			fmt.Println("Выбранные файлы:", files)
 		}
 	})
 
+	// Выпадающий список шаблонов
 	templateOptions := []string{"Шаблон 1", "Шаблон 2"}
 	templateSelect := widget.NewSelect(templateOptions, func(value string) {
 		selectedTemplate = value
 		fmt.Println("Выбранный шаблон:", selectedTemplate)
 	})
 
+	// Поле для ввода ID сотрудников
 	idEntry := widget.NewEntry()
 	idEntry.SetPlaceHolder("Введите ID сотрудников через пробел")
 
-	confirmWorkersButton := widget.NewButton("Подтвердить подписантов", func() {
+	// Кнопка для подтверждения подписантов
+	confirmWorkersButton := widget.NewButtonWithIcon("Добавить подписантов", theme.ConfirmIcon(), func() {
 		ids := strings.Split(idEntry.Text, " ")
-		fmt.Println("IDS", ids)
-		users, err := internal.ReadDataFromExcel(ids)
+
+		// Чтение подписантов и добавление их в массив
+		newUsers, err := internal.ReadDataFromExcel(ids)
 		if err != nil {
 			dialog.Message("%s", err.Error()).Title("Ошибка").Error()
 			log.Println("Ошибка при чтении данных из Excel:", err)
 		} else {
-			for _, user := range users {
-				// Создаем новый элемент для списка подписантов
-				userLabel := widget.NewLabel(user.WorkType + " " + user.FullName)
+			for _, newUser := range newUsers {
+				found := false
+				for _, existingUser := range users {
+					if existingUser.FullName == newUser.FullName && existingUser.WorkType == newUser.WorkType {
+						found = true
+						break
+					}
+				}
+				if !found {
+					users = append(users, newUser)
+				}
+			}
 
-				// Переменная для хранения горизонтального контейнера с меткой и кнопкой
+			// Обновляем список подписантов в интерфейсе
+			signerList.RemoveAll() // Очищаем контейнер перед добавлением
+			for _, user := range users {
+				userLabel := widget.NewLabel(user.WorkType + " " + user.FullName)
 				signerContainer := container.NewHBox()
 
-				// Используем NewButtonWithIcon для создания кнопки с иконкой
 				removeButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-					// Удаляем подписанта из списка
 					for i, u := range users {
 						if u.FullName == user.FullName && u.WorkType == user.WorkType {
 							users = append(users[:i], users[i+1:]...)
 							break
 						}
 					}
-					// Удаляем элемент из контейнера
 					signerList.Remove(signerContainer)
 					fmt.Println("Текущие подписанты:", users)
 				})
 
-				// Добавляем метку и кнопку в контейнер
 				signerContainer.Add(userLabel)
 				signerContainer.Add(removeButton)
-
-				// Добавляем контейнер с подписантом в список
 				signerList.Add(signerContainer)
 			}
+
+			fmt.Println("Текущие подписанты:", users)
 		}
 	})
 
-	content := container.NewVBox(
-		openFileButton,
+	// Организация группировки элементов интерфейса
+	fileGroup := container.NewVBox(
+		widget.NewLabel("Файлы:"),
 		fileList,
+		openFileButton,
+	)
+
+	templateGroup := container.NewVBox(
 		widget.NewLabel("Выберите шаблон:"),
 		templateSelect,
-		widget.NewLabel("Введите IDшники:"),
+	)
+
+	signerGroup := container.NewVBox(
+		widget.NewLabel("Подписанты:"),
+		signerList,
 		idEntry,
 		confirmWorkersButton,
-		signerList,
+	)
+
+	content := container.NewVBox(
+		fileGroup,
+		templateGroup,
+		signerGroup,
 	)
 
 	myWindow.SetContent(content)
