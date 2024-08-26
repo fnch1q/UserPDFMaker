@@ -1,4 +1,4 @@
-package internal
+package utils
 
 import (
 	"UserPDFMaker/internal/data"
@@ -8,7 +8,7 @@ import (
 	"golang.org/x/text/encoding/charmap"
 )
 
-func encodeToWindows1251(input string) string {
+func encodeToWindows1251(input string) string { // Не работает
 	encoder := charmap.Windows1251.NewEncoder()
 	output, _ := encoder.String(input)
 	return output
