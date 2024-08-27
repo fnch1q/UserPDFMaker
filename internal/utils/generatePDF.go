@@ -5,39 +5,44 @@ import (
 	_ "image/jpeg"
 
 	"github.com/jung-kurt/gofpdf"
-	"golang.org/x/text/encoding/charmap"
 )
-
-func encodeToWindows1251(input string) string { // Не работает
-	encoder := charmap.Windows1251.NewEncoder()
-	output, _ := encoder.String(input)
-	return output
-}
 
 func GeneratePDF(user data.User) error {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 
-	pdf.SetFont("Arial", "B", 16)
-	pdf.Cell(40, 10, encodeToWindows1251("ФИО: "+user.FullName))
-	pdf.Ln(12)
+	// Добавляем шрифт для поддержки кириллицы
+	pdf.AddUTF8Font("TimesNewRoman", "", "fonts/times_new_roman.ttf")
+	pdf.SetFont("TimesNewRoman", "", 12)
 
-	pdf.SetFont("Arial", "", 12)
-	pdf.Cell(40, 10, encodeToWindows1251("Вид работы: "+user.WorkType))
-	pdf.Ln(12)
+	// Устанавливаем ширину для каждой ячейки
+	colWidth1 := 95.0
+	colWidth2 := 95.0
 
-	// Вставка подписи
-	if user.Signature != "" {
-		pdf.Image(user.Signature, 10, 50, 40, 20, false, "", 0, "")
+	// Первый столбец
+	pdf.SetXY(10, 10)
+	pdf.MultiCell(colWidth1, 10, "Длинный текст для первого столбца, который может занимать несколько строк, и его высота будет автоматически подстроена.", "1", "L", false)
+	y1 := pdf.GetY() // Получаем высоту после первой ячейки
+
+	// Второй столбец
+	pdf.SetXY(105, 10) // Позиционируем по горизонтали, оставляя место для первого столбца
+	pdf.MultiCell(colWidth2, 10, "Короткий текст для второго столбца.", "1", "L", false)
+	y2 := pdf.GetY() // Получаем высоту после второй ячейки
+
+	// Определяем максимальную высоту для выравнивания
+	maxHeight := y1
+	if y2 > maxHeight {
+		maxHeight = y2
 	}
 
-	// Сохранение PDF файла
-	err := pdf.OutputFileAndClose("output.pdf")
+	// Устанавливаем высоту для следующего контента
+	pdf.SetY(maxHeight + 10)
+
+	// Сохраняем PDF файл
+	err := pdf.OutputFileAndClose("table_output.pdf")
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
-
-// TO DO (Кириллица)
