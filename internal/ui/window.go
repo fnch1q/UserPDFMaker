@@ -2,6 +2,7 @@ package ui
 
 import (
 	"UserPDFMaker/internal/data"
+	"UserPDFMaker/internal/utils"
 	"fmt"
 
 	"fyne.io/fyne/v2"
@@ -26,7 +27,21 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 	templateGroup := CreateTemplateGroup()
 	signerGroup := CreateSignerGroup()
 	generatePdfButton := widget.NewButtonWithIcon("Сгенерировать PDF", theme.FileTextIcon(), func() {
-		fmt.Println(files, users, selectedTemplate)
+		if len(users) == 0 {
+			fmt.Println("Нет пользователей для генерации PDF")
+			return
+		}
+
+		// Выбираем первого пользователя для примера
+		user := users[0]
+
+		// Вызываем функцию для генерации PDF
+		err := utils.GeneratePDF(user)
+		if err != nil {
+			fmt.Println("Ошибка при генерации PDF:", err)
+		} else {
+			fmt.Println("PDF успешно сгенерирован")
+		}
 	})
 
 	content := container.NewVBox(
