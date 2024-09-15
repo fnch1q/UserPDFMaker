@@ -3,9 +3,17 @@ package data
 import "time"
 
 type Input struct {
-	Users    []User
-	Files    []File
-	Template string
+	Users                   []User
+	Files                   []File
+	Template                string
+	ObjectName              string //Наименование объекта
+	SerialNumber            string //Порядковый номер документа
+	DocumentDefiniton       string //Обозначение ДЭ
+	DocumentName            string //Наименование документа
+	LastVersionUpdateNumber string //Номер последнего изменения
+	InfoCertifyingSheet     string //Обозначение ИУЛ
+	Page                    int    //Номер страницы ИУЛ
+	Limit                   int    //Количество листов ИУЛ
 }
 
 type User struct {
