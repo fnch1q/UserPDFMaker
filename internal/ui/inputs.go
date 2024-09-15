@@ -77,25 +77,19 @@ func CreateDocumentDetailsGroup() *fyne.Container {
 	label := widget.NewLabel("Детали документа")
 	label.TextStyle = fyne.TextStyle{Bold: true}
 
-	// Собираем все в контейнер
+	// Собираем все в контейнер с использованием Grid
 	return container.NewVBox(
 		label,
-		widget.NewLabel("Наименование объекта:"),
-		objectNameEntry,
-		widget.NewLabel("Порядковый номер документа:"),
-		serialNumberEntry,
-		widget.NewLabel("Обозначение ДЭ:"),
-		documentDefinitionEntry,
-		widget.NewLabel("Наименование документа:"),
-		documentNameEntry,
-		widget.NewLabel("Номер последнего изменения:"),
-		lastVersionUpdateNumberEntry,
-		widget.NewLabel("Обозначение ИУЛ:"),
-		infoCertifyingSheetEntry,
-		widget.NewLabel("Номер страницы ИУЛ:"),
-		pageEntry,
-		widget.NewLabel("Количество листов ИУЛ:"),
-		limitEntry,
+		container.NewGridWithColumns(2,
+			widget.NewLabel("Наименование объекта:"), objectNameEntry,
+			widget.NewLabel("Порядковый номер документа:"), serialNumberEntry,
+			widget.NewLabel("Обозначение ДЭ:"), documentDefinitionEntry,
+			widget.NewLabel("Наименование документа:"), documentNameEntry,
+			widget.NewLabel("Номер последнего изменения:"), lastVersionUpdateNumberEntry,
+			widget.NewLabel("Обозначение ИУЛ:"), infoCertifyingSheetEntry,
+			widget.NewLabel("Номер страницы ИУЛ:"), pageEntry,
+			widget.NewLabel("Количество листов ИУЛ:"), limitEntry,
+		),
 	)
 }
 
