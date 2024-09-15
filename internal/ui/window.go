@@ -23,6 +23,7 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 	// Создание и добавление элементов интерфейса
 	fileGroup := CreateFileGroup()
 	templateGroup := CreateTemplateGroup()
+	documentDetailsGroup := CreateDocumentDetailsGroup()
 	signerGroup := CreateSignerGroup()
 	generatePdfButton := widget.NewButtonWithIcon("Сгенерировать PDF", theme.FileTextIcon(), func() {
 		if len(input.Users) == 0 {
@@ -42,14 +43,26 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 		}
 	})
 
-	content := container.NewVBox(
+	settingsTab := container.NewVBox(
 		templateGroup,
+		documentDetailsGroup,
+	)
+
+	// Вкладка для подписантов и файлов
+	filesTab := container.NewVBox(
 		fileGroup,
 		signerGroup,
 		generatePdfButton,
 	)
 
-	window.SetContent(content)
-	_ = input.Template
+	// Создаем табы
+	tabs := container.NewAppTabs(
+		container.NewTabItem("Настройки", settingsTab),
+		container.NewTabItem("Файлы и подписанты", filesTab),
+	)
+
+	// Устанавливаем содержимое окна
+	window.SetContent(tabs)
+
 	return window
 }
