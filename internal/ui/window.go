@@ -11,9 +11,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-var files []data.File
-var users []data.User
-var selectedTemplate string
+var input data.Input
 
 func CreateMainWindow(app fyne.App) fyne.Window {
 	window := app.NewWindow("PDF Maker")
@@ -27,13 +25,13 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 	templateGroup := CreateTemplateGroup()
 	signerGroup := CreateSignerGroup()
 	generatePdfButton := widget.NewButtonWithIcon("Сгенерировать PDF", theme.FileTextIcon(), func() {
-		if len(users) == 0 {
+		if len(input.Users) == 0 {
 			fmt.Println("Нет пользователей для генерации PDF")
 			return
 		}
 
 		// Выбираем первого пользователя для примера
-		user := users[0]
+		user := input.Users[0]
 
 		// Вызываем функцию для генерации PDF
 		err := utils.GeneratePDF(user)
@@ -52,6 +50,6 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 	)
 
 	window.SetContent(content)
-	_ = selectedTemplate
+	_ = input.Template
 	return window
 }

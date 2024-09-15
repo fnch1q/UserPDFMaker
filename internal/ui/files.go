@@ -25,7 +25,7 @@ func CreateFileGroup() *fyne.Container {
 				return
 			}
 
-			files = append(files, *newFile)
+			input.Files = append(input.Files, *newFile)
 			addFileToList(newFile, fileList)
 		}
 	})
@@ -44,9 +44,9 @@ func addFileToList(newFile *data.File, fileList *fyne.Container) {
 	fileLabel := widget.NewLabel(newFile.Name)
 	fileContainer := container.NewHBox()
 	removeButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-		for i, f := range files {
+		for i, f := range input.Files {
 			if f.Path == newFile.Path {
-				files = append(files[:i], files[i+1:]...)
+				input.Files = append(input.Files[:i], input.Files[i+1:]...)
 				break
 			}
 		}

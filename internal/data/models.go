@@ -2,6 +2,12 @@ package data
 
 import "time"
 
+type Input struct {
+	Users    []User
+	Files    []File
+	Template string
+}
+
 type User struct {
 	ID        string
 	WorkType  string
@@ -10,7 +16,6 @@ type User struct {
 }
 
 type File struct {
-	ID         string
 	Path       string
 	Name       string
 	Hash       string

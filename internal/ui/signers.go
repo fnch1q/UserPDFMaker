@@ -43,14 +43,14 @@ func CreateSignerGroup() *fyne.Container {
 func addUsersToList(newUsers []data.User, signerList *fyne.Container) {
 	for _, newUser := range newUsers {
 		found := false
-		for _, existingUser := range users {
+		for _, existingUser := range input.Users {
 			if existingUser.FullName == newUser.FullName && existingUser.WorkType == newUser.WorkType {
 				found = true
 				break
 			}
 		}
 		if !found {
-			users = append(users, newUser)
+			input.Users = append(input.Users, newUser)
 		}
 	}
 	updateSignerList(signerList)
@@ -59,14 +59,14 @@ func addUsersToList(newUsers []data.User, signerList *fyne.Container) {
 func updateSignerList(signerList *fyne.Container) {
 	signerList.RemoveAll() // Очищаем контейнер перед обновлением
 
-	for _, user := range users {
+	for _, user := range input.Users {
 		userLabel := widget.NewLabel(user.WorkType + " " + user.FullName)
 		signerContainer := container.NewHBox()
 
 		removeButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-			for i, u := range users {
+			for i, u := range input.Users {
 				if u.FullName == user.FullName && u.WorkType == user.WorkType {
-					users = append(users[:i], users[i+1:]...)
+					input.Users = append(input.Users[:i], input.Users[i+1:]...)
 					break
 				}
 			}

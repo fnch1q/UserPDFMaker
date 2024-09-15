@@ -9,7 +9,7 @@ import (
 func CreateTemplateGroup() *fyne.Container {
 	templateOptions := []string{"Шаблон 1", "Шаблон 2"}
 	templateSelect := widget.NewSelect(templateOptions, func(value string) {
-		selectedTemplate = value
+		input.Template = value
 	})
 
 	label := widget.NewLabel("Выберите шаблон:")
