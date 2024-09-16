@@ -11,8 +11,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-var input data.Input
-
 func CreateMainWindow(app fyne.App) fyne.Window {
 	window := app.NewWindow("PDF Maker")
 	window.Resize(fyne.NewSize(800, 600))
@@ -20,11 +18,12 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 	icon, _ := fyne.LoadResourceFromPath("../images/app_icon.png")
 	window.SetIcon(icon)
 
+	var input data.Input
 	// Создание и добавление элементов интерфейса
-	fileGroup := CreateFileGroup()
-	templateGroup := CreateTemplateGroup()
-	documentDetailsGroup := CreateDocumentDetailsGroup()
-	signerGroup := CreateSignerGroup()
+	fileGroup := CreateFileGroup(&input)
+	templateGroup := CreateTemplateGroup(&input)
+	documentDetailsGroup := CreateDocumentDetailsGroup(&input)
+	signerGroup := CreateSignerGroup(&input)
 	generatePdfButton := widget.NewButtonWithIcon("Сгенерировать PDF", theme.FileTextIcon(), func() {
 		if len(input.Users) == 0 {
 			fmt.Println("Нет пользователей для генерации PDF")

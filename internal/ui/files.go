@@ -10,7 +10,7 @@ import (
 	"github.com/sqweek/dialog"
 )
 
-func CreateFileGroup() *fyne.Container {
+func CreateFileGroup(input *data.Input) *fyne.Container {
 	fileList := container.NewVBox()
 	openFileButton := widget.NewButtonWithIcon("Добавить файл", theme.FolderIcon(), func() {
 		selectedPath, err := dialog.File().Filter("Все файлы", "*").Load()
@@ -26,7 +26,7 @@ func CreateFileGroup() *fyne.Container {
 			}
 
 			input.Files = append(input.Files, *newFile)
-			addFileToList(newFile, fileList)
+			addFileToList(newFile, input, fileList)
 		}
 	})
 
@@ -40,7 +40,7 @@ func CreateFileGroup() *fyne.Container {
 	)
 }
 
-func addFileToList(newFile *data.File, fileList *fyne.Container) {
+func addFileToList(newFile *data.File, input *data.Input, fileList *fyne.Container) {
 	fileLabel := widget.NewLabel(newFile.Name)
 	fileContainer := container.NewHBox()
 	removeButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {

@@ -12,7 +12,7 @@ import (
 	"github.com/sqweek/dialog"
 )
 
-func CreateSignerGroup() *fyne.Container {
+func CreateSignerGroup(input *data.Input) *fyne.Container {
 	idEntry := widget.NewEntry()
 	idEntry.SetPlaceHolder("Введите ID сотрудников через пробел")
 
@@ -25,7 +25,7 @@ func CreateSignerGroup() *fyne.Container {
 			dialog.Message("%s", err.Error()).Title("Ошибка").Error()
 			log.Println("Ошибка при чтении данных из Excel:", err)
 		} else {
-			addUsersToList(newUsers, signerList) // Передаем список в функцию
+			addUsersToList(input, newUsers, signerList) // Передаем список в функцию
 		}
 	})
 
@@ -40,7 +40,7 @@ func CreateSignerGroup() *fyne.Container {
 	)
 }
 
-func addUsersToList(newUsers []data.User, signerList *fyne.Container) {
+func addUsersToList(input *data.Input, newUsers []data.User, signerList *fyne.Container) {
 	for _, newUser := range newUsers {
 		found := false
 		for _, existingUser := range input.Users {
@@ -53,10 +53,10 @@ func addUsersToList(newUsers []data.User, signerList *fyne.Container) {
 			input.Users = append(input.Users, newUser)
 		}
 	}
-	updateSignerList(signerList)
+	updateSignerList(input, signerList)
 }
 
-func updateSignerList(signerList *fyne.Container) {
+func updateSignerList(input *data.Input, signerList *fyne.Container) {
 	signerList.RemoveAll() // Очищаем контейнер перед обновлением
 
 	for _, user := range input.Users {
@@ -70,7 +70,7 @@ func updateSignerList(signerList *fyne.Container) {
 					break
 				}
 			}
-			updateSignerList(signerList) // Обновляем список подписантов после удаления
+			updateSignerList(input, signerList) // Обновляем список подписантов после удаления
 		})
 
 		signerContainer.Add(userLabel)
