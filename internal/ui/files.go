@@ -13,11 +13,18 @@ import (
 func CreateFileGroup(input *data.Input) *fyne.Container {
 	fileList := container.NewVBox()
 	openFileButton := widget.NewButtonWithIcon("Добавить файл", theme.FolderIcon(), func() {
+		// Проверка на выбранный шаблон
+		if input.Template == "Шаблон 2" && len(input.Files) >= 1 {
+			dialog.Message("Вы не можете выбрать более одного файла для этого шаблона").Title("Ограничение").Error()
+			return
+		}
+
 		selectedPath, err := dialog.File().Filter("Все файлы", "*").Load()
 		if err != nil {
 			dialog.Message("%s", err.Error()).Title("Ошибка").Error()
 			return
 		}
+
 		if selectedPath != "" {
 			newFile, err := data.NewFile(selectedPath)
 			if err != nil {

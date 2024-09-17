@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/sqweek/dialog"
 )
 
 func CreateMainWindow(app fyne.App) fyne.Window {
@@ -19,6 +20,7 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 	window.SetIcon(icon)
 
 	var input data.Input
+
 	// Создание и добавление элементов интерфейса
 	fileGroup := CreateFileGroup(&input)
 	templateGroup := CreateTemplateGroup(&input)
@@ -59,6 +61,15 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 		container.NewTabItem("Настройки", settingsTab),
 		container.NewTabItem("Файлы и подписанты", filesTab),
 	)
+
+	// Добавляем обработчик выбора вкладки
+	tabs.OnSelected = func(tab *container.TabItem) {
+		if tab.Text == "Файлы и подписанты" && input.Template == "" {
+			dialog.Message("Пожалуйста, выберите шаблон перед переходом на эту вкладку").Title("Выберите шаблон").Error()
+			// Возвращаемся на вкладку "Настройки"
+			tabs.SelectTabIndex(0)
+		}
+	}
 
 	// Устанавливаем содержимое окна
 	window.SetContent(tabs)
