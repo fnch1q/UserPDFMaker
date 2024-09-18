@@ -13,19 +13,23 @@ import (
 )
 
 func CreateSignerGroup(input *data.Input) *fyne.Container {
-	idEntry := widget.NewEntry()
-	idEntry.SetPlaceHolder("Введите ID сотрудников через пробел")
-
-	signerList := container.NewVBox() // Создаем контейнер для списка подписантов
+	// Создаем контейнер для списка подписантов только если он не создан ранее
+	if input.Widgets.SignerList == nil {
+		input.Widgets.SignerList = container.NewVBox() // Создаем контейнер для списка подписантов
+	}
+	if input.Widgets.IDEntry == nil {
+		input.Widgets.IDEntry = widget.NewEntry()
+	}
+	input.Widgets.IDEntry.SetPlaceHolder("Введите ID сотрудников через пробел")
 
 	confirmWorkersButton := widget.NewButtonWithIcon("Добавить подписантов", theme.ConfirmIcon(), func() {
-		ids := strings.Split(idEntry.Text, " ")
+		ids := strings.Split(input.Widgets.IDEntry.Text, " ")
 		newUsers, err := data.ReadDataFromExcel(ids)
 		if err != nil {
 			dialog.Message("%s", err.Error()).Title("Ошибка").Error()
 			log.Println("Ошибка при чтении данных из Excel:", err)
 		} else {
-			addUsersToList(input, newUsers, signerList) // Передаем список в функцию
+			addUsersToList(input, newUsers) // Передаем список в функцию
 		}
 	})
 
@@ -34,13 +38,13 @@ func CreateSignerGroup(input *data.Input) *fyne.Container {
 
 	return container.NewVBox(
 		label,
-		signerList, // Включаем контейнер для списка подписантов
-		idEntry,
+		input.Widgets.SignerList, // Включаем контейнер для списка подписантов
+		input.Widgets.IDEntry,
 		confirmWorkersButton,
 	)
 }
 
-func addUsersToList(input *data.Input, newUsers []data.User, signerList *fyne.Container) {
+func addUsersToList(input *data.Input, newUsers []data.User) {
 	for _, newUser := range newUsers {
 		found := false
 		for _, existingUser := range input.Users {
@@ -53,11 +57,11 @@ func addUsersToList(input *data.Input, newUsers []data.User, signerList *fyne.Co
 			input.Users = append(input.Users, newUser)
 		}
 	}
-	updateSignerList(input, signerList)
+	updateSignerList(input) // Обновляем список подписантов после добавления
 }
 
-func updateSignerList(input *data.Input, signerList *fyne.Container) {
-	signerList.RemoveAll() // Очищаем контейнер перед обновлением
+func updateSignerList(input *data.Input) {
+	input.Widgets.SignerList.RemoveAll() // Очищаем контейнер перед обновлением
 
 	for _, user := range input.Users {
 		userLabel := widget.NewLabel(user.WorkType + " " + user.FullName)
@@ -70,13 +74,13 @@ func updateSignerList(input *data.Input, signerList *fyne.Container) {
 					break
 				}
 			}
-			updateSignerList(input, signerList) // Обновляем список подписантов после удаления
+			updateSignerList(input) // Обновляем список подписантов после удаления
 		})
 
 		signerContainer.Add(userLabel)
 		signerContainer.Add(removeButton)
-		signerList.Add(signerContainer)
+		input.Widgets.SignerList.Add(signerContainer)
 	}
 
-	signerList.Refresh() // Обновляем отображение контейнера на экране
+	input.Widgets.SignerList.Refresh() // Обновляем отображение контейнера на экране
 }

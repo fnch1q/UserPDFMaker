@@ -15,7 +15,6 @@ import (
 func CreateMainWindow(app fyne.App) fyne.Window {
 	window := app.NewWindow("PDF Maker")
 	window.Resize(fyne.NewSize(800, 600))
-
 	icon, _ := fyne.LoadResourceFromPath("../images/app_icon.png")
 	window.SetIcon(icon)
 
@@ -24,8 +23,10 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 	// Создание и добавление элементов интерфейса
 	fileGroup := CreateFileGroup(&input)
 	templateGroup := CreateTemplateGroup(&input)
-	documentDetailsGroup := CreateDocumentDetailsGroup(&input)
 	signerGroup := CreateSignerGroup(&input)
+	documentDetailsGroup := CreateDocumentDetailsGroup(&input)
+
+	// Генерация пдф (эндпоинт)
 	generatePdfButton := widget.NewButtonWithIcon("Сгенерировать PDF", theme.FileTextIcon(), func() {
 		if len(input.Users) == 0 {
 			fmt.Println("Нет пользователей для генерации PDF")
@@ -41,22 +42,20 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 			fmt.Println("Ошибка при генерации PDF:", err)
 		} else {
 			fmt.Println("PDF успешно сгенерирован")
+			resetInput(&input)
 		}
 	})
 
+	// Создаем вкладки
 	settingsTab := container.NewVBox(
 		templateGroup,
 		documentDetailsGroup,
 	)
-
-	// Вкладка для подписантов и файлов
 	filesTab := container.NewVBox(
 		fileGroup,
 		signerGroup,
 		generatePdfButton,
 	)
-
-	// Создаем табы
 	tabs := container.NewAppTabs(
 		container.NewTabItem("Настройки", settingsTab),
 		container.NewTabItem("Файлы и подписанты", filesTab),
@@ -71,8 +70,39 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 		}
 	}
 
-	// Устанавливаем содержимое окна
 	window.SetContent(tabs)
-
 	return window
+}
+
+func resetInput(input *data.Input) {
+	input.Users = nil
+	input.Files = nil
+	input.ObjectName = ""
+	input.SerialNumber = ""
+	input.DocumentDefiniton = ""
+	input.DocumentName = ""
+	input.LastVersionUpdateNumber = ""
+	input.InfoCertifyingSheet = ""
+	input.Page = 0
+	input.Limit = 0
+
+	// Сбрасываем виджеты
+	input.Widgets.IDEntry.SetText("")
+	input.Widgets.ObjectName.SetText("")
+	input.Widgets.SerialNumber.SetText("")
+	input.Widgets.DocumentDefiniton.SetText("")
+	input.Widgets.DocumentName.SetText("")
+	input.Widgets.LastVersionUpdateNumber.SetText("")
+	input.Widgets.InfoCertifyingSheet.SetText("")
+	input.Widgets.Page.SetText("")
+	input.Widgets.Limit.SetText("")
+
+	// Если контейнер для файлов существует, очищаем его
+	if input.FileList != nil {
+		input.FileList.RemoveAll()
+	}
+
+	if input.SignerList != nil {
+		input.SignerList.RemoveAll()
+	}
 }
