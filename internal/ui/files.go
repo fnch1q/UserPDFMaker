@@ -12,6 +12,7 @@ import (
 
 func CreateFileGroup(input *data.Input) *fyne.Container {
 	fileList := container.NewVBox()
+	input.FileList = fileList
 	openFileButton := widget.NewButtonWithIcon("Добавить файл", theme.FolderIcon(), func() {
 		// Проверка на выбранный шаблон
 		if input.Template == "Шаблон 2" && len(input.Files) >= 1 {
@@ -33,7 +34,7 @@ func CreateFileGroup(input *data.Input) *fyne.Container {
 			}
 
 			input.Files = append(input.Files, *newFile)
-			addFileToList(newFile, input, fileList)
+			addFileToList(newFile, input)
 		}
 	})
 
@@ -47,7 +48,7 @@ func CreateFileGroup(input *data.Input) *fyne.Container {
 	)
 }
 
-func addFileToList(newFile *data.File, input *data.Input, fileList *fyne.Container) {
+func addFileToList(newFile *data.File, input *data.Input) {
 	fileLabel := widget.NewLabel(newFile.Name)
 	fileContainer := container.NewHBox()
 	removeButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
@@ -57,10 +58,10 @@ func addFileToList(newFile *data.File, input *data.Input, fileList *fyne.Contain
 				break
 			}
 		}
-		fileList.Remove(fileContainer)
+		input.FileList.Remove(fileContainer)
 	})
 
 	fileContainer.Add(fileLabel)
 	fileContainer.Add(removeButton)
-	fileList.Add(fileContainer)
+	input.FileList.Add(fileContainer)
 }

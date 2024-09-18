@@ -14,6 +14,10 @@ func CreateTemplateGroup(input *data.Input) *fyne.Container {
 	templateOptions := []string{"Шаблон 1", "Шаблон 2"}
 	templateSelect := widget.NewSelect(templateOptions, func(value string) {
 		input.Template = value
+		// Очищаем файлы при смене шаблона
+		input.Files = nil
+		input.FileList.RemoveAll() // Очищаем визуальный список файлов
+		fmt.Println("Файлы удалены из списка и структуры после смены шаблона.")
 	})
 
 	label := widget.NewLabel("Выберите шаблон:")

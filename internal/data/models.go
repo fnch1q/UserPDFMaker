@@ -1,6 +1,10 @@
 package data
 
-import "time"
+import (
+	"time"
+
+	"fyne.io/fyne/v2"
+)
 
 type Input struct {
 	Users                   []User
@@ -14,6 +18,7 @@ type Input struct {
 	InfoCertifyingSheet     string //Обозначение ИУЛ
 	Page                    int    //Номер страницы ИУЛ
 	Limit                   int    //Количество листов ИУЛ
+	FileList                *fyne.Container
 }
 
 type User struct {
