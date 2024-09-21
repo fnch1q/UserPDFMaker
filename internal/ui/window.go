@@ -34,10 +34,9 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 		}
 
 		// Выбираем первого пользователя для примера
-		user := input.Users[0]
 
 		// Вызываем функцию для генерации PDF
-		err := utils.GeneratePDF(user)
+		err := utils.GeneratePDF(input)
 		if err != nil {
 			fmt.Println("Ошибка при генерации PDF:", err)
 		} else {
