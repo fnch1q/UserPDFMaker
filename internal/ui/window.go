@@ -28,12 +28,20 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 
 	// Генерация пдф (эндпоинт)
 	generatePdfButton := widget.NewButtonWithIcon("Сгенерировать PDF", theme.FileTextIcon(), func() {
-		if len(input.Users) == 0 {
-			fmt.Println("Нет пользователей для генерации PDF")
+		if !validateInput(input) {
+			dialog.Message("Пожалуйста, заполните все обязательные поля").Title("Ошибка валидации").Error()
 			return
 		}
 
-		// Выбираем первого пользователя для примера
+		if len(input.Files) == 0 {
+			dialog.Message("Пожалуйста, добавьте хотя бы один файл").Title("Ошибка").Error()
+			return
+		}
+
+		if len(input.Users) == 0 {
+			dialog.Message("Пожалуйста, добавьте хотя бы одного подписанта").Title("Ошибка").Error()
+			return
+		}
 
 		// Вызываем функцию для генерации PDF
 		err := utils.GeneratePDF(input)
@@ -104,4 +112,19 @@ func resetInput(input *data.Input) {
 	if input.SignerList != nil {
 		input.SignerList.RemoveAll()
 	}
+}
+
+func validateInput(input data.Input) bool {
+	if input.Template == "" ||
+		input.ObjectName == "" ||
+		input.SerialNumber == "" ||
+		input.DocumentDefiniton == "" ||
+		input.DocumentName == "" ||
+		input.LastVersionUpdateNumber == "" ||
+		input.InfoCertifyingSheet == "" ||
+		input.Page == 0 ||
+		input.Limit == 0 {
+		return false
+	}
+	return true
 }
