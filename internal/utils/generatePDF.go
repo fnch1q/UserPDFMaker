@@ -2,21 +2,30 @@ package utils
 
 import (
 	"UserPDFMaker/internal/data"
+	"image"
 	_ "image/jpeg"
+	"math"
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/jung-kurt/gofpdf"
 )
 
 const (
-	label1 = "Наименование объекта"
-	label2 = "Номер"
-	label3 = "п/п"
-	label4 = "Обозначение"
-	label5 = "документа"
-	label6 = "Наименование документа"
-	label7 = "Номер последнего"
-	label8 = "изменения (версии)"
+	label1   = "Наименование объекта"
+	label2   = "Номер"
+	label3   = "п/п"
+	label4   = "Обозначение"
+	label5   = "документа"
+	label6   = "Наименование документа"
+	label7   = "Номер последнего"
+	label8   = "изменения (версии)"
+	label9   = "Характер работы"
+	label10  = "Фамилия"
+	label11  = "Подпись"
+	label12  = "Дата подписания"
+	defaultX = 22.0
 )
 
 func GeneratePDF(input data.Input) error {
@@ -26,7 +35,6 @@ func GeneratePDF(input data.Input) error {
 	pdf.AddUTF8Font("TNRBold", "", "fonts/times_new_roman_bold.ttf")
 	pdf.SetFont("TNRBold", "", 11.5)
 
-	defaultX := 22.0
 	defaultY := 10.0
 	x := 90.0
 	y := pdf.GetY()
@@ -94,10 +102,22 @@ func GeneratePDF(input data.Input) error {
 	pdf.SetX(defaultX)
 	y = pdf.GetY()
 	pdf.MultiCell(68, 5, input.Files[0].Name, "1", "CM", false)
+	calcY := pdf.GetY() - y
 	pdf.SetXY(defaultX+68, y)
 	updateTime := input.Files[0].UpdateTime
-	pdf.CellFormat(52, 10, updateTime.Format("02.01.2006 15:04"), "1", 0, "CM", false, 0, "")
-	pdf.CellFormat(56, 10, strconv.Itoa(int(input.Files[0].Size)), "1", 1, "CM", false, 0, "")
+	pdf.CellFormat(52, calcY, updateTime.Format("02.01.2006 15:04"), "1", 0, "CM", false, 0, "")
+	pdf.CellFormat(56, calcY, strconv.Itoa(int(input.Files[0].Size)), "1", 1, "CM", false, 0, "")
+
+	pdf.SetX(defaultX)
+	pdf.CellFormat(46, 5, label9, "1", 0, "CM", false, 0, "")
+	pdf.CellFormat(46, 5, label10, "1", 0, "CM", false, 0, "")
+	pdf.CellFormat(38, 5, label11, "1", 0, "CM", false, 0, "")
+	pdf.CellFormat(46, 5, label12, "1", 1, "CM", false, 0, "")
+
+	for _, user := range input.Users {
+		pdf.SetX(defaultX)
+		outputUserInfo(user, pdf.GetY(), pdf)
+	}
 
 	err := pdf.OutputFileAndClose("table_output.pdf")
 	if err != nil {
@@ -105,4 +125,90 @@ func GeneratePDF(input data.Input) error {
 	}
 
 	return nil
+}
+
+func outputUserInfo(user data.User, currentY float64, pdf *gofpdf.Fpdf) {
+	workTypeArr := pdf.SplitText(user.WorkType, 46)
+	fullNameArr := pdf.SplitText(user.FullName, 46)
+	maxKoef := math.Max(float64(len(workTypeArr)), float64(len(fullNameArr)))
+
+	maxY := 5.0
+	if maxKoef != 0 {
+		maxY *= maxKoef
+	}
+
+	var y float64
+	isImage, _ := checkImageFormat(user.Signature)
+	if len(fullNameArr) == 1 && len(workTypeArr) == 1 && isImage {
+		y = 2.5
+	}
+
+	if len(fullNameArr) > len(workTypeArr) {
+		pdf.SetXY(defaultX+46, currentY)
+		pdf.MultiCell(46, 5, user.FullName, "", "L", false)
+		if y != 2.5 {
+			y = ((pdf.GetY() - currentY) - (float64(len(workTypeArr)) * 5)) / 2
+		}
+		pdf.SetXY(defaultX, currentY+y)
+		pdf.MultiCell(46, 5, user.WorkType, "", "CM", false)
+	} else {
+		pdf.SetXY(defaultX, currentY+y)
+		pdf.MultiCell(46, 5, user.WorkType, "", "CM", false)
+		if y != 2.5 {
+			y = ((pdf.GetY() - currentY) - (float64(len(fullNameArr)) * 5)) / 2
+		}
+		pdf.SetXY(defaultX+46, currentY+y)
+		pdf.MultiCell(46, 5, user.FullName, "", "L", false)
+	}
+
+	pdf.SetXY(defaultX+92, currentY)
+
+	if isImage {
+		// Вставляем изображение
+		imageHeight := 10.0
+		if maxY == 5 {
+			maxY = 10
+		}
+		imageY := currentY
+		if maxY > 10 {
+			imageY += (maxY - imageHeight) / 2
+		}
+		pdf.ImageOptions(user.Signature, defaultX+92, imageY, 38, imageHeight, false, gofpdf.ImageOptions{}, 0, "")
+	} else {
+		// Если изображение не найдено
+		pdf.CellFormat(38, maxY, "", "1", 0, "CM", false, 0, "")
+	}
+
+	pdf.SetXY(defaultX+130, currentY)
+	t := time.Now()
+	pdf.CellFormat(46, maxY, t.Format("02.01.2006"), "1", 1, "CM", false, 0, "")
+
+	pdf.SetXY(defaultX, currentY)
+	pdf.CellFormat(46, maxY, "", "1", 0, "", false, 0, "")
+	pdf.SetXY(defaultX+46, currentY)
+	pdf.CellFormat(46, maxY, "", "1", 0, "", false, 0, "")
+	pdf.SetXY(defaultX+92, currentY)
+	pdf.CellFormat(38, maxY, "", "1", 0, "", false, 0, "")
+	pdf.SetXY(defaultX+130, currentY)
+	pdf.CellFormat(46, maxY, "", "1", 1, "", false, 0, "")
+}
+
+func checkImageFormat(filePath string) (bool, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
+
+	// Определение формата изображения
+	_, format, err := image.DecodeConfig(file)
+	if err != nil {
+		return false, err
+	}
+
+	if format == "jpeg" || format == "png" {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }
