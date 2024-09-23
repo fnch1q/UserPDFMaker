@@ -2,6 +2,8 @@ package ui
 
 import (
 	"UserPDFMaker/internal/data"
+	"io/ioutil"
+	"path/filepath"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -15,9 +17,9 @@ func CreateFileGroup(input *data.Input) *fyne.Container {
 	input.Widgets.FileList = container.NewVBox()
 
 	// Кнопка для добавления файла
-	openFileButton := widget.NewButtonWithIcon("Добавить файл", theme.FolderIcon(), func() {
+	openFileButton := widget.NewButtonWithIcon("Добавить файл", theme.FileIcon(), func() {
 		// Проверка на выбранный шаблон
-		if input.Template == "Шаблон 2" && len(input.Files) >= 1 {
+		if input.Template == template1 && len(input.Files) >= 1 {
 			dialog.Message("Вы не можете выбрать более одного файла для этого шаблона").Title("Ограничение").Error()
 			return
 		}
@@ -43,14 +45,49 @@ func CreateFileGroup(input *data.Input) *fyne.Container {
 		}
 	})
 
-	// Заголовок группы
+	openFolderButton := widget.NewButtonWithIcon("Добавить папку", theme.FolderIcon(), func() {
+		// Открытие диалогового окна для выбора папки
+		if input.Template == template1 {
+			dialog.Message("Вы не можете выбрать более одного файла для этого шаблона").Title("Ограничение").Error()
+			return
+		}
+		selectedPath, err := dialog.Directory().Browse()
+		if err != nil {
+			dialog.Message("%s", err.Error()).Title("Ошибка").Error()
+			return
+		}
+
+		if selectedPath != "" {
+			// Добавление всех файлов в папке в список
+			files, err := ioutil.ReadDir(selectedPath)
+			if err != nil {
+				dialog.Message("%s", err.Error()).Title("Ошибка").Error()
+				return
+			}
+
+			for _, file := range files {
+				if !file.IsDir() {
+					newFile, err := data.NewFile(filepath.Join(selectedPath, file.Name()))
+					if err != nil {
+						dialog.Message("%s", err.Error()).Title("Ошибка").Error()
+						return
+					}
+
+					input.Files = append(input.Files, *newFile)
+					addFileToList(newFile, input)
+				}
+			}
+		}
+	})
+
 	label := widget.NewLabel("Файлы:")
 	label.TextStyle = fyne.TextStyle{Bold: true}
 
 	return container.NewVBox(
 		label,
-		input.Widgets.FileList, // Используем input.Widgets.FileList
+		input.Widgets.FileList,
 		openFileButton,
+		openFolderButton,
 	)
 }
 

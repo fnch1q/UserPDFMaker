@@ -14,7 +14,7 @@ import (
 func CreateTemplateGroup(input *data.Input) *fyne.Container {
 	// Убедитесь, что TemplateSelect создан
 	if input.Widgets.TemplateSelect == nil {
-		templateOptions := []string{"Шаблон 1", "Шаблон 2"}
+		templateOptions := []string{template1, template2}
 		input.Widgets.TemplateSelect = widget.NewSelect(templateOptions, func(value string) {
 			input.Template = value
 			// Очищаем файлы при смене шаблона

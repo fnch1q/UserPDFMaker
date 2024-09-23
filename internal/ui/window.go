@@ -12,6 +12,11 @@ import (
 	"github.com/sqweek/dialog"
 )
 
+const (
+	template1 = "Шаблон 1"
+	template2 = "Шаблон 2"
+)
+
 func CreateMainWindow(app fyne.App) fyne.Window {
 	window := app.NewWindow("PDF Maker")
 	window.Resize(fyne.NewSize(800, 600))
