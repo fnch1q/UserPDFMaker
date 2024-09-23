@@ -119,7 +119,7 @@ func GeneratePDF(input data.Input) error {
 		outputUserInfo(user, pdf.GetY(), pdf)
 	}
 
-	err := pdf.OutputFileAndClose("table_output.pdf")
+	err := pdf.OutputFileAndClose("output_" + time.Now().Format("02.01.2006 15:04") + ".pdf")
 	if err != nil {
 		return err
 	}
