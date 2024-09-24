@@ -6,10 +6,12 @@ import (
 	_ "image/jpeg"
 	"math"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/jung-kurt/gofpdf"
+	"github.com/sqweek/dialog"
 )
 
 const (
@@ -29,6 +31,15 @@ const (
 )
 
 func GeneratePDF(input data.Input) error {
+	savePath, err := dialog.File().Title("Выберите место для сохранения PDF").Filter("PDF file", "pdf").Save()
+	if err != nil {
+		return err // Пользователь отменил выбор или произошла ошибка
+	}
+
+	if filepath.Ext(savePath) != ".pdf" {
+		savePath += ".pdf"
+	}
+
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.AddUTF8Font("TNR", "", "fonts/times_new_roman.ttf")
@@ -119,7 +130,7 @@ func GeneratePDF(input data.Input) error {
 		outputUserInfo(user, pdf.GetY(), pdf)
 	}
 
-	err := pdf.OutputFileAndClose("output.pdf")
+	err = pdf.OutputFileAndClose(savePath)
 	if err != nil {
 		return err
 	}
