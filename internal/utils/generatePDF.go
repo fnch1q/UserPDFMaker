@@ -119,7 +119,7 @@ func GeneratePDF(input data.Input) error {
 		outputUserInfo(user, pdf.GetY(), pdf)
 	}
 
-	err := pdf.OutputFileAndClose("output_" + time.Now().Format("02.01.2006 15:04") + ".pdf")
+	err := pdf.OutputFileAndClose("output.pdf")
 	if err != nil {
 		return err
 	}
@@ -132,22 +132,35 @@ func outputUserInfo(user data.User, currentY float64, pdf *gofpdf.Fpdf) {
 	fullNameArr := pdf.SplitText(user.FullName, 46)
 	maxKoef := math.Max(float64(len(workTypeArr)), float64(len(fullNameArr)))
 
-	maxY := 5.0
+	maxY := 10.0
+	cellHeight := 5.0
 	if maxKoef != 0 {
-		maxY *= maxKoef
+		cellHeight *= maxKoef
+	}
+	if cellHeight > maxY {
+		maxY = cellHeight
 	}
 
 	var y float64
 	isImage, _ := checkImageFormat(user.Signature)
-	if len(fullNameArr) == 1 && len(workTypeArr) == 1 && isImage {
+	lenFullName, lenWorkType := len(fullNameArr), len(workTypeArr)
+
+	if lenFullName == 0 {
+		lenFullName = 1
+	}
+	if lenWorkType == 0 {
+		lenWorkType = 1
+	}
+
+	if lenFullName == 1 && lenWorkType == 1 {
 		y = 2.5
 	}
 
-	if len(fullNameArr) > len(workTypeArr) {
+	if lenFullName > lenWorkType {
 		pdf.SetXY(defaultX+46, currentY)
 		pdf.MultiCell(46, 5, user.FullName, "", "L", false)
 		if y != 2.5 {
-			y = ((pdf.GetY() - currentY) - (float64(len(workTypeArr)) * 5)) / 2
+			y = ((pdf.GetY() - currentY) - (float64(lenWorkType) * 5)) / 2
 		}
 		pdf.SetXY(defaultX, currentY+y)
 		pdf.MultiCell(46, 5, user.WorkType, "", "CM", false)
@@ -155,7 +168,7 @@ func outputUserInfo(user data.User, currentY float64, pdf *gofpdf.Fpdf) {
 		pdf.SetXY(defaultX, currentY+y)
 		pdf.MultiCell(46, 5, user.WorkType, "", "CM", false)
 		if y != 2.5 {
-			y = ((pdf.GetY() - currentY) - (float64(len(fullNameArr)) * 5)) / 2
+			y = ((pdf.GetY() - currentY) - (float64(lenFullName) * 5)) / 2
 		}
 		pdf.SetXY(defaultX+46, currentY+y)
 		pdf.MultiCell(46, 5, user.FullName, "", "L", false)
@@ -206,7 +219,7 @@ func checkImageFormat(filePath string) (bool, error) {
 		return false, err
 	}
 
-	if format == "jpeg" || format == "png" {
+	if format == "jpeg" || format == "png" || format == "jpg" {
 		return true, nil
 	} else {
 		return false, nil
