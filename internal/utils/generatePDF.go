@@ -2,6 +2,7 @@ package utils
 
 import (
 	"UserPDFMaker/internal/data"
+	"embed"
 	"errors"
 	"fmt"
 	"image"
@@ -15,6 +16,9 @@ import (
 	"github.com/jung-kurt/gofpdf"
 	"github.com/sqweek/dialog"
 )
+
+//go:embed fonts/*
+var fontFS embed.FS
 
 const (
 	label1            = "Наименование объекта"
@@ -78,8 +82,19 @@ func GeneratePDF(input data.Input) error {
 
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
-	pdf.AddUTF8Font("TNR", "", "fonts/times_new_roman.ttf")
-	pdf.AddUTF8Font("TNRBold", "", "fonts/times_new_roman_bold.ttf")
+	// Чтение шрифтов из встраиваемых файлов
+	fontBytes, err := fontFS.ReadFile("fonts/times_new_roman.ttf")
+	if err != nil {
+		return err
+	}
+	pdf.AddUTF8FontFromBytes("TNR", "", fontBytes)
+
+	fontBoldBytes, err := fontFS.ReadFile("fonts/times_new_roman_bold.ttf")
+	if err != nil {
+		return err
+	}
+	pdf.AddUTF8FontFromBytes("TNRBold", "", fontBoldBytes)
+
 	pdf.SetFont("TNRBold", "", 11.5)
 
 	size, err := getCellSize(input.Template)
