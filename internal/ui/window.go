@@ -68,9 +68,13 @@ func CreateMainWindow(app fyne.App) fyne.Window {
 		signerGroup,
 		generatePdfButton,
 	)
+
+	scrollContainer := container.NewVScroll(filesTab)
+	scrollContainer.SetMinSize(fyne.NewSize(800, 600))
+
 	tabs := container.NewAppTabs(
 		container.NewTabItem("Настройки", settingsTab),
-		container.NewTabItem("Файлы и подписанты", filesTab),
+		container.NewTabItem("Файлы и подписанты", scrollContainer),
 	)
 
 	// Добавляем обработчик выбора вкладки
