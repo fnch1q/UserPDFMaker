@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	template1 = "Шаблон 1"
-	template2 = "Шаблон 2"
+	template1 = "Один файл"
+	template2 = "Несколько файлов"
 )
 
 func CreateMainWindow(app fyne.App) fyne.Window {

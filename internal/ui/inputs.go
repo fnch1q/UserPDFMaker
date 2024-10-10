@@ -37,6 +37,7 @@ func CreateTemplateGroup(input *data.Input) *fyne.Container {
 
 func CreateDocumentDetailsGroup(input *data.Input) *fyne.Container {
 	maxLength := 256
+	maxDocumentNameLength := maxLength * 2
 	// Инициализация виджетов, если они не были созданы
 	if input.Widgets.ObjectName == nil {
 		input.Widgets.ObjectName = widget.NewEntry()
@@ -89,6 +90,12 @@ func CreateDocumentDetailsGroup(input *data.Input) *fyne.Container {
 		}
 		return nil
 	})
+	input.Widgets.SerialNumber.OnChanged = func(text string) {
+		if isNumeric(text) {
+			input.SerialNumber = text
+			fmt.Println(input)
+		}
+	}
 
 	input.Widgets.DocumentDefiniton.SetPlaceHolder("Обозначение ДЭ")
 	input.Widgets.DocumentDefiniton.OnChanged = func(text string) {
@@ -108,16 +115,16 @@ func CreateDocumentDetailsGroup(input *data.Input) *fyne.Container {
 
 	input.Widgets.DocumentName.SetPlaceHolder("Наименование документа")
 	input.Widgets.DocumentName.OnChanged = func(text string) {
-		if len(text) > maxLength {
-			text = text[:maxLength]
+		if len(text) > maxDocumentNameLength {
+			text = text[:maxDocumentNameLength]
 			input.Widgets.DocumentName.SetText(text) // update the widget's text
 		}
 		input.DocumentName = text
 		fmt.Println(input)
 	}
 	input.Widgets.DocumentName.Validator = (func(text string) error {
-		if len(text) > maxLength {
-			input.Widgets.DocumentName.SetText(text[:maxLength])
+		if len(text) > maxDocumentNameLength {
+			input.Widgets.DocumentName.SetText(text[:maxDocumentNameLength])
 		}
 		return nil
 	})
@@ -132,6 +139,12 @@ func CreateDocumentDetailsGroup(input *data.Input) *fyne.Container {
 		}
 		return nil
 	})
+	input.Widgets.LastVersionUpdateNumber.OnChanged = func(text string) {
+		if isNumeric(text) {
+			input.LastVersionUpdateNumber = text
+			fmt.Println(input)
+		}
+	}
 
 	input.Widgets.InfoCertifyingSheet.SetPlaceHolder("Обозначение ИУЛ")
 	input.Widgets.InfoCertifyingSheet.OnChanged = func(text string) {
@@ -159,6 +172,12 @@ func CreateDocumentDetailsGroup(input *data.Input) *fyne.Container {
 		}
 		return nil
 	})
+	input.Widgets.Page.OnChanged = func(text string) {
+		if isNumeric(text) {
+			input.Page = textToInt(text)
+			fmt.Println(input)
+		}
+	}
 
 	input.Widgets.Limit.SetPlaceHolder("Количество листов ИУЛ")
 	input.Widgets.Limit.Validator = (func(text string) error {
@@ -170,6 +189,12 @@ func CreateDocumentDetailsGroup(input *data.Input) *fyne.Container {
 		}
 		return nil
 	})
+	input.Widgets.Limit.OnChanged = func(text string) {
+		if isNumeric(text) {
+			input.Limit = textToInt(text)
+			fmt.Println(input)
+		}
+	}
 
 	// Заголовок группы
 	label := widget.NewLabel("Детали документа")
