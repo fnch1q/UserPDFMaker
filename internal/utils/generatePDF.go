@@ -44,8 +44,8 @@ const (
 	pageHeight        = 297.0
 	pageWidth         = 210.0
 	defaultCellHeight = 5.0
-	template1         = "Шаблон 1"
-	template2         = "Шаблон 2"
+	template1         = "Один файл"
+	template2         = "Несколько файлов"
 )
 
 type cellSize struct {
